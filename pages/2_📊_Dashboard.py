@@ -6,7 +6,7 @@ from modules.ui import UI
 import streamlit as st
 
 st.set_page_config(
-    page_title="Dashboard",
+    page_title="Pinkal AI Analytics",
     page_icon="📊",
     layout="wide"
 )

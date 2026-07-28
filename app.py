@@ -2,12 +2,12 @@ import streamlit as st
 from services.project_service import ProjectService
 
 st.set_page_config(
-    page_title="MyAIAnalytics",
+    page_title="Pinkal AI Analytics",
     page_icon="📊",
     layout="wide"
 )
 
-st.title("📊 MyAIAnalytics")
+st.title("📊 Pinkal AI Analytics")
 st.caption("Your Personal AI Data Analyst")
 
 st.markdown("---")

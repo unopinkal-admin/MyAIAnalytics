@@ -5,7 +5,7 @@ from modules.theme import Theme
 from modules.ai import AIAnalyst
 
 st.set_page_config(
-    page_title="AI Analyst",
+    page_title="Pinkal AI Analytics",
     page_icon="🤖",
     layout="wide"
 )
@@ -13,7 +13,7 @@ st.set_page_config(
 Theme.load()
 UI.show_sidebar()
 
-st.title("🤖 AI Business Analyst")
+st.title("🤖 Pinkal AI Analytics")
 
 # Get current project
 project = st.session_state.get("project")

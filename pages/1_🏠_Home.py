@@ -2,13 +2,13 @@ from modules.theme import Theme
 from modules.ui import UI
 import streamlit as st
 
-st.set_page_config(page_title="Home", page_icon="🏠")
+st.set_page_config(page_title="Pinkal AI Analytics", page_icon="🏠")
 Theme.load()
 UI.show_sidebar()
 
-st.title("📊 MyAIAnalytics")
+st.title("📊 Pinkal AI Analytics")
 
-st.subheader("Your Personal AI Data Analyst")
+st.subheader("AI Data Analyst")
 
 st.markdown("---")
 
