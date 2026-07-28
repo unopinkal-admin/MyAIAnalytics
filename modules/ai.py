@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 
 import streamlit as st
 from openai import OpenAI
@@ -10,9 +11,28 @@ class AIAnalyst:
 
     def __init__(self):
 
+        # Try Streamlit secrets first (local)
+        api_key = None
+
+        try:
+            api_key = st.secrets["OPENROUTER_API_KEY"]
+        except Exception:
+            pass
+
+        # Fallback to Render environment variable
+        if not api_key:
+            api_key = os.getenv("OPENROUTER_API_KEY")
+
+        if not api_key:
+            raise ValueError(
+                "OPENROUTER_API_KEY not found. "
+                "Configure it in .streamlit/secrets.toml "
+                "or as an environment variable."
+            )
+
         self.client = OpenAI(
             base_url="https://openrouter.ai/api/v1",
-            api_key=st.secrets["OPENROUTER_API_KEY"]
+            api_key=api_key
         )
 
         self.system_prompt = self.load_system_prompt()
@@ -47,6 +67,7 @@ class AIAnalyst:
             ],
 
             temperature=0.2
+
         )
 
         return response.choices[0].message.content
