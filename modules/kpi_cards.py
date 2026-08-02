@@ -1,117 +1,102 @@
 import streamlit as st
+
 from modules.business_metrics import BusinessMetrics
+from modules.metric_card import MetricCard
 
 
 class KPICards:
 
     @staticmethod
     def money(value):
+
         if value is None:
             return "-"
+
         return f"${value:,.0f}"
 
     @staticmethod
     def percent(value):
+
         if value is None:
             return "-"
+
         return f"{value:.1f}%"
 
     @staticmethod
     def number(value):
+
         if value is None:
             return "-"
+
         return f"{value:,}"
-
-    @staticmethod
-    def card(title, value, color="#1f77b4"):
-
-        st.markdown(
-            f"""
-<div style="
-background:linear-gradient(135deg,#ffffff,#f8fbff);
-padding:22px;
-border-radius:18px;
-border-left:6px solid {color};
-box-shadow:0 4px 12px rgba(0,0,0,.08);
-border:1px solid #ececec;
-height:140px;
-display:flex;
-flex-direction:column;
-justify-content:center;
-">
-
-<div style="
-font-size:16px;
-font-weight:600;
-color:#666;
-margin-bottom:14px;
-">
-
-{title}
-
-</div>
-
-<div style="
-font-size:36px;
-font-weight:700;
-color:{color};
-line-height:1;
-">
-
-{value}
-
-</div>
-
-</div>
-""",
-            unsafe_allow_html=True,
-        )
 
     @staticmethod
     def show(project):
 
         metrics = BusinessMetrics.calculate(project)
 
-        c1, c2, c3, c4, c5, c6 = st.columns(6)
+        c1, c2, c3 = st.columns(3)
 
         with c1:
-            KPICards.card(
-                "💰 Revenue",
-                KPICards.money(metrics["revenue"]),
-                "#2E86DE",
+
+            MetricCard.show(
+                title="Revenue",
+                value=KPICards.money(metrics["revenue"]),
+                icon="💰",
+                color="blue",
+                subtitle="Total Sales"
             )
 
         with c2:
-            KPICards.card(
-                "💸 Cost",
-                KPICards.money(metrics["cost"]),
-                "#E67E22",
+
+            MetricCard.show(
+                title="Cost",
+                value=KPICards.money(metrics["cost"]),
+                icon="💸",
+                color="orange",
+                subtitle="Total Cost"
             )
 
         with c3:
-            KPICards.card(
-                "📈 Profit",
-                KPICards.money(metrics["profit"]),
-                "#27AE60",
+
+            MetricCard.show(
+                title="Profit",
+                value=KPICards.money(metrics["profit"]),
+                icon="📈",
+                color="green",
+                subtitle="Net Profit"
             )
 
+        st.write("")
+
+        c4, c5, c6 = st.columns(3)
+
         with c4:
-            KPICards.card(
-                "📊 Margin",
-                KPICards.percent(metrics["margin"]),
-                "#8E44AD",
+
+            MetricCard.show(
+                title="Margin",
+                value=KPICards.percent(metrics["margin"]),
+                icon="📊",
+                color="purple",
+                subtitle="Profit Margin"
             )
 
         with c5:
-            KPICards.card(
-                "📄 Records",
-                KPICards.number(metrics["rows"]),
-                "#16A085",
+
+            MetricCard.show(
+                title="Records",
+                value=KPICards.number(metrics["rows"]),
+                icon="📄",
+                color="teal",
+                subtitle="Rows Loaded"
             )
 
         with c6:
-            KPICards.card(
-                "⭐ Quality",
-                KPICards.percent(metrics["quality"]),
-                "#C0392B",
+
+            MetricCard.show(
+                title="Quality",
+                value=KPICards.percent(metrics["quality"]),
+                icon="⭐",
+                color="red",
+                subtitle="Data Quality"
             )

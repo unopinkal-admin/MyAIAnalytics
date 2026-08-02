@@ -2,6 +2,7 @@ import plotly.express as px
 import streamlit as st
 
 from modules.dataset_analyzer import DatasetAnalyzer
+from modules.card import Card
 
 
 class ChartEngine:
