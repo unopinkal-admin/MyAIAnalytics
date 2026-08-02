@@ -8,8 +8,8 @@ class UI:
 
         with st.sidebar:
 
-            st.title("📊 MyAIAnalytics")
-            st.caption("Your Personal AI Data Analyst")
+            st.title("📊 Pinkal AI Analytics")
+            st.caption("Your Personal Data Analyst")
 
             st.markdown("---")
 
