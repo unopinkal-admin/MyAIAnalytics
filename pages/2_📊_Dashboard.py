@@ -1,9 +1,20 @@
-from modules.health_card import HealthCard
-from modules.executive_briefing import ExecutiveBriefing
-from modules.dashboard import Dashboard
+import streamlit as st
+
 from modules.theme import Theme
 from modules.ui import UI
-import streamlit as st
+
+from modules.header import Header
+from modules.filter_engine import FilterEngine
+from modules.business_metrics import BusinessMetrics
+from modules.kpi_cards import KPICards
+from modules.chart_engine import ChartEngine
+from modules.executive_briefing import ExecutiveBriefing
+from modules.health_card import HealthCard
+
+
+# ---------------------------------------------------
+# Page Configuration
+# ---------------------------------------------------
 
 st.set_page_config(
     page_title="Pinkal AI Analytics",
@@ -14,95 +25,72 @@ st.set_page_config(
 Theme.load()
 UI.show_sidebar()
 
-st.title("📊 Executive Dashboard")
+# ---------------------------------------------------
+# Load Project
+# ---------------------------------------------------
 
 project = st.session_state.get("project")
 
 if project is None:
     st.warning("⚠️ No dataset loaded.")
-    st.info("Please upload a dataset from the Home page.")
+    st.info("Upload a dataset from the Home page.")
     st.stop()
 
-df = project["df"]
-profile = project["profile"]
-insights = project["insights"]
-health = project["health"]
+# ---------------------------------------------------
+# Executive Header
+# ---------------------------------------------------
 
-briefing = ExecutiveBriefing.generate(project)
+Header.show(project)
 
-# ==================================================
-# Business Health
-# ==================================================
+# ---------------------------------------------------
+# Global Filters
+# ---------------------------------------------------
 
-HealthCard.show(health)
+filtered_df = FilterEngine.apply(project["df"])
+
+# Create a filtered project so every module
+# uses the same filtered data.
+filtered_project = project.copy()
+filtered_project["df"] = filtered_df
+
+# ---------------------------------------------------
+# Business Metrics
+# ---------------------------------------------------
+
+BusinessMetrics.calculate(filtered_project)
+
+KPICards.show(filtered_project)
+
+# ---------------------------------------------------
+# Charts
+# ---------------------------------------------------
+
+ChartEngine.show(filtered_df)
 
 st.divider()
 
-# ==================================================
+# ---------------------------------------------------
 # Executive Briefing
-# ==================================================
+# ---------------------------------------------------
 
 st.subheader("🧠 Executive Briefing")
 
-quality = profile["quality_score"]
-
-if quality >= 90:
-    status = "🟢 Excellent"
-elif quality >= 70:
-    status = "🟡 Good"
-else:
-    status = "🔴 Needs Attention"
-
-st.success(
-    f"""
-### Dataset: **{project['file_name']}**
-
-Overall Data Quality: **{status} ({quality}%)**
-"""
-)
-
-st.markdown("### 📋 Key Findings")
+briefing = ExecutiveBriefing.generate(filtered_project)
 
 for item in briefing["findings"]:
-    st.markdown(f"✅ {item}")
+    st.success(item)
 
-st.markdown("### 🎯 Recommended Actions")
+st.markdown("### Recommended Actions")
 
 for item in briefing["recommendations"]:
     st.markdown(f"• {item}")
 
 st.divider()
 
-# ==================================================
-# KPI Cards
-# ==================================================
+# ---------------------------------------------------
+# Business Health
+# ---------------------------------------------------
 
-st.subheader("📊 Key Metrics")
+st.subheader("❤️ Business Health")
 
-c1, c2, c3, c4 = st.columns(4)
-
-c1.metric("Rows", f"{profile['rows']:,}")
-c2.metric("Columns", profile["columns"])
-c3.metric("Duplicates", profile["duplicates"])
-c4.metric("Quality", f"{quality}%")
-
-st.divider()
-
-# ==================================================
-# AI Findings
-# ==================================================
-
-st.subheader("💡 AI Findings")
-
-for insight in insights:
-    st.info(insight)
-
-st.divider()
-
-# ==================================================
-# Interactive Dashboard
-# ==================================================
-
-st.subheader("📈 Interactive Dashboard")
-
-Dashboard.build(df)
+HealthCard.show(filtered_project["health"])

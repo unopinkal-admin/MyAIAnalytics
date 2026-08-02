@@ -7,47 +7,85 @@ class Theme:
     def load():
 
         st.markdown("""
-        <style>
+<style>
 
-        /* Main App */
-        .main {
-            background-color: #F8FAFC;
-        }
+/* ==========================
+   Main App
+========================== */
 
-        /* KPI Cards */
-        div[data-testid="metric-container"]{
-            background: white;
-            border:1px solid #E5E7EB;
-            padding:18px;
-            border-radius:12px;
-            box-shadow:0 2px 8px rgba(0,0,0,.05);
-        }
+.main .block-container{
+    max-width:1400px;
+    padding-top:1.5rem;
+    padding-bottom:2rem;
+}
 
-        /* Buttons */
-        .stButton > button{
-            width:100%;
-            border-radius:10px;
-            height:45px;
-            font-weight:600;
-        }
+/* ==========================
+   Headers
+========================== */
 
-        /* Headers */
-        h1{
-            color:#1E3A8A;
-        }
+h1{
+    font-weight:700;
+    margin-bottom:0.25rem;
+}
 
-        h2,h3{
-            color:#334155;
-        }
+h2,h3{
+    font-weight:600;
+}
 
-        /* Sidebar */
-        section[data-testid="stSidebar"]{
-            background:#111827;
-        }
+/* ==========================
+   Sections
+========================== */
 
-        section[data-testid="stSidebar"] *{
-            color:white;
-        }
+.section-title{
+    font-size:22px;
+    font-weight:700;
+    margin-top:25px;
+    margin-bottom:12px;
+}
 
-        </style>
-        """, unsafe_allow_html=True)
+/* ==========================
+   Divider
+========================== */
+
+hr{
+    margin-top:25px;
+    margin-bottom:25px;
+}
+
+/* ==========================
+   Streamlit Metrics
+========================== */
+
+[data-testid="metric-container"]{
+    border-radius:16px;
+    padding:18px;
+    border:1px solid #ECECEC;
+    box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+
+/* ==========================
+   Sidebar
+========================== */
+
+[data-testid="stSidebar"]{
+    border-right:1px solid #ECECEC;
+}
+
+/* ==========================
+   Plotly Charts
+========================== */
+
+.js-plotly-plot{
+    border-radius:16px;
+}
+
+/* ==========================
+   Tables
+========================== */
+
+[data-testid="stDataFrame"]{
+    border-radius:16px;
+}
+
+</style>
+""", unsafe_allow_html=True)
