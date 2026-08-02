@@ -3,26 +3,91 @@ import pandas as pd
 
 class DatasetAnalyzer:
     """
-    Intelligent dataset analyzer.
+    Intelligent dataset analyzer used throughout the dashboard.
 
-    This module inspects a dataframe and returns useful
-    metadata that every dashboard component can reuse.
+    Detects important columns automatically so the dashboard
+    adapts to almost any dataset.
     """
+
+    METRIC_PRIORITY = [
+        "Sales",
+        "Revenue",
+        "Amount",
+        "Profit",
+        "Cost",
+        "Price",
+        "Value",
+        "Total",
+        "Quantity",
+        "Qty",
+    ]
+
+    DATE_PRIORITY = [
+        "Date",
+        "Order Date",
+        "Invoice Date",
+        "Created",
+        "Created Date",
+        "Timestamp",
+    ]
+
+    REGION_PRIORITY = [
+        "Region",
+        "Country",
+        "State",
+        "Province",
+        "City",
+        "Location",
+        "Territory",
+    ]
+
+    CATEGORY_PRIORITY = [
+        "Category",
+        "Department",
+        "Segment",
+        "Type",
+        "Product",
+        "Product Category",
+        "Brand",
+    ]
+
+    STATUS_PRIORITY = [
+        "Status",
+        "Order Status",
+        "Stage",
+        "State",
+    ]
+
+    @staticmethod
+    def _find_column(df, candidates):
+
+        columns = {c.lower(): c for c in df.columns}
+
+        for candidate in candidates:
+
+            if candidate.lower() in columns:
+                return columns[candidate.lower()]
+
+        return None
 
     @staticmethod
     def analyze(df):
 
         analysis = {}
 
-        # ----------------------------------
-        # Column Types
-        # ----------------------------------
+        # ============================================
+        # Numeric Columns
+        # ============================================
 
         analysis["numeric"] = (
             df.select_dtypes(include="number")
             .columns
             .tolist()
         )
+
+        # ============================================
+        # Text Columns
+        # ============================================
 
         analysis["categorical"] = (
             df.select_dtypes(
@@ -32,122 +97,156 @@ class DatasetAnalyzer:
             .tolist()
         )
 
-        analysis["dates"] = (
+        # ============================================
+        # Datetime Columns
+        # ============================================
+
+        date_columns = (
             df.select_dtypes(
-                include="datetime"
+                include=["datetime64", "datetime64[ns]"]
             )
             .columns
             .tolist()
         )
 
-        # ----------------------------------
+        if not date_columns:
+
+            for column in df.columns:
+
+                if "date" in column.lower():
+
+                    try:
+                        pd.to_datetime(df[column])
+
+                        date_columns.append(column)
+
+                    except Exception:
+                        pass
+
+        analysis["dates"] = date_columns
+
+        # ============================================
         # Primary Metric
-        # ----------------------------------
+        # ============================================
 
-        preferred_metrics = [
-            "Sales",
-            "Revenue",
-            "Amount",
-            "Profit",
-            "Cost",
-            "Price",
-            "Value",
-        ]
-
-        metric = None
-
-        for col in preferred_metrics:
-            if col in df.columns:
-                metric = col
-                break
+        metric = DatasetAnalyzer._find_column(
+            df,
+            DatasetAnalyzer.METRIC_PRIORITY,
+        )
 
         if metric is None and analysis["numeric"]:
+
             metric = analysis["numeric"][0]
 
         analysis["primary_metric"] = metric
 
-        # ----------------------------------
+        # ============================================
         # Primary Date
-        # ----------------------------------
+        # ============================================
 
-        analysis["primary_date"] = (
-            analysis["dates"][0]
-            if analysis["dates"]
-            else None
+        date_col = DatasetAnalyzer._find_column(
+            df,
+            DatasetAnalyzer.DATE_PRIORITY,
         )
 
-        # ----------------------------------
+        if date_col is None and date_columns:
+
+            date_col = date_columns[0]
+
+        analysis["primary_date"] = date_col
+
+        # ============================================
         # Region
-        # ----------------------------------
+        # ============================================
 
-        region_names = [
-            "Region",
-            "Country",
-            "State",
-            "City",
-            "Location",
-        ]
+        analysis["region"] = DatasetAnalyzer._find_column(
+            df,
+            DatasetAnalyzer.REGION_PRIORITY,
+        )
 
-        region = None
-
-        for col in region_names:
-            if col in df.columns:
-                region = col
-                break
-
-        analysis["region"] = region
-
-        # ----------------------------------
+        # ============================================
         # Category
-        # ----------------------------------
+        # ============================================
 
-        category_names = [
-            "Category",
-            "Department",
-            "Segment",
-            "Type",
-            "Product",
-        ]
+        analysis["category"] = DatasetAnalyzer._find_column(
+            df,
+            DatasetAnalyzer.CATEGORY_PRIORITY,
+        )
 
-        category = None
+        # ============================================
+        # Status
+        # ============================================
 
-        for col in category_names:
-            if col in df.columns:
-                category = col
-                break
+        analysis["status"] = DatasetAnalyzer._find_column(
+            df,
+            DatasetAnalyzer.STATUS_PRIORITY,
+        )
 
-        analysis["category"] = category
-
-        # ----------------------------------
+        # ============================================
         # Dataset Type
-        # ----------------------------------
+        # ============================================
 
-        dataset_type = "General"
+        lower = [c.lower() for c in df.columns]
 
-        cols = [c.lower() for c in df.columns]
+        if any(
+            x in lower
+            for x in [
+                "sales",
+                "revenue",
+                "customer",
+                "profit",
+            ]
+        ):
 
-        if any(x in cols for x in [
-            "sales",
-            "revenue",
-            "profit",
-            "customer"
-        ]):
             dataset_type = "Sales"
 
-        elif any(x in cols for x in [
-            "employee",
-            "salary",
-            "department"
-        ]):
+        elif any(
+            x in lower
+            for x in [
+                "employee",
+                "salary",
+                "department",
+            ]
+        ):
+
             dataset_type = "HR"
 
-        elif any(x in cols for x in [
-            "expense",
-            "income",
-            "budget"
-        ]):
+        elif any(
+            x in lower
+            for x in [
+                "expense",
+                "budget",
+                "income",
+                "finance",
+            ]
+        ):
+
             dataset_type = "Finance"
 
+        elif any(
+            x in lower
+            for x in [
+                "inventory",
+                "stock",
+                "warehouse",
+            ]
+        ):
+
+            dataset_type = "Inventory"
+
+        else:
+
+            dataset_type = "General"
+
         analysis["dataset_type"] = dataset_type
+
+        # ============================================
+        # Summary
+        # ============================================
+
+        analysis["rows"] = len(df)
+        analysis["columns"] = len(df.columns)
+        analysis["missing_values"] = int(df.isna().sum().sum())
+        analysis["duplicate_rows"] = int(df.duplicated().sum())
 
         return analysis

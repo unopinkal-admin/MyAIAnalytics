@@ -12,14 +12,23 @@ from modules.executive_briefing import ExecutiveBriefing
 from modules.health_card import HealthCard
 
 
+# =====================================================
+# Page Configuration
+# =====================================================
+
 st.set_page_config(
     page_title="Pinkal AI Analytics Pro",
     page_icon="🚀",
-    layout="wide"
+    layout="wide",
 )
 
 Theme.load()
 UI.show_sidebar()
+
+
+# =====================================================
+# Load Project
+# =====================================================
 
 project = st.session_state.get("project")
 
@@ -29,74 +38,116 @@ if project is None:
     st.stop()
 
 
-# ====================================================
-# Executive Header
-# ====================================================
-
-Header.show(project)
-
-st.markdown("<br>", unsafe_allow_html=True)
-
-
-# ====================================================
+# =====================================================
 # Global Filters
-# ====================================================
-
-st.markdown("## 📊 Executive Workspace")
+# =====================================================
 
 filtered_df = FilterEngine.apply(project["df"])
 
 filtered_project = project.copy()
 filtered_project["df"] = filtered_df
 
-BusinessMetrics.calculate(filtered_project)
+metrics = BusinessMetrics.calculate(filtered_project)
+
+filtered_project["metrics"] = metrics
 
 
-# ====================================================
+# =====================================================
+# Executive Header
+# =====================================================
+
+Header.show(filtered_project)
+
+st.markdown("<div style='height:24px'></div>", unsafe_allow_html=True)
+
+
+# =====================================================
 # Business Overview
-# ====================================================
-
-st.markdown("### 💼 Business Overview")
+# =====================================================
 
 KPICards.show(filtered_project)
 
-st.markdown("---")
+st.markdown("<div style='height:24px'></div>", unsafe_allow_html=True)
 
 
-# ====================================================
+# =====================================================
 # Analytics Workspace
-# ====================================================
-
-st.markdown("### 📈 Analytics Workspace")
+# =====================================================
 
 ChartEngine.show(filtered_df)
 
-st.markdown("---")
+st.markdown("<div style='height:24px'></div>", unsafe_allow_html=True)
 
 
-# ====================================================
+# =====================================================
 # Executive Intelligence
-# ====================================================
-
-st.markdown("### 🧠 Executive Intelligence")
+# =====================================================
 
 briefing = ExecutiveBriefing.generate(filtered_project)
 
-for finding in briefing["findings"]:
-    st.success(finding)
+st.markdown(
+    """
+<div style="
+background:white;
+padding:28px;
+border-radius:22px;
+border:1px solid #E5E7EB;
+box-shadow:0 8px 24px rgba(0,0,0,.06);
+margin-bottom:24px;
+">
 
-st.markdown("#### 🎯 Recommended Actions")
+<h2 style="margin-top:0;margin-bottom:25px;color:#1E293B;">
+🧠 Executive Intelligence
+</h2>
 
-for recommendation in briefing["recommendations"]:
-    st.markdown(f"- {recommendation}")
+""",
+    unsafe_allow_html=True,
+)
 
-st.markdown("---")
+left, right = st.columns(2)
+
+with left:
+
+    st.markdown("### 📌 Key Findings")
+
+    for finding in briefing["findings"]:
+        st.success(finding)
+
+with right:
+
+    st.markdown("### 🎯 Recommended Actions")
+
+    for recommendation in briefing["recommendations"]:
+        st.info(recommendation)
+
+st.markdown("</div>", unsafe_allow_html=True)
+
+st.markdown("<div style='height:24px'></div>", unsafe_allow_html=True)
 
 
-# ====================================================
+# =====================================================
 # Business Health
-# ====================================================
-
-st.markdown("### ❤️ Business Health")
+# =====================================================
 
 HealthCard.show(filtered_project["health"])
+
+st.markdown("<div style='height:24px'></div>", unsafe_allow_html=True)
+
+
+# =====================================================
+# Footer
+# =====================================================
+
+st.markdown(
+    """
+<div style="
+text-align:center;
+color:#94A3B8;
+font-size:13px;
+padding:10px 0 20px 0;
+">
+Pinkal AI Analytics Pro • Executive Dashboard
+</div>
+""",
+    unsafe_allow_html=True,
+)

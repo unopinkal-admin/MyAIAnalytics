@@ -11,45 +11,86 @@ class AIAnalyst:
 
     def __init__(self):
 
-        # Try Streamlit secrets first (local)
         api_key = None
+
+        # ==========================================
+        # Streamlit Secrets
+        # ==========================================
 
         try:
             api_key = st.secrets["OPENROUTER_API_KEY"]
         except Exception:
             pass
 
-        # Fallback to Render environment variable
+        # ==========================================
+        # Environment Variable
+        # ==========================================
+
         if not api_key:
             api_key = os.getenv("OPENROUTER_API_KEY")
 
         if not api_key:
             raise ValueError(
-                "OPENROUTER_API_KEY not found. "
-                "Configure it in .streamlit/secrets.toml "
-                "or as an environment variable."
+                "OPENROUTER_API_KEY was not found.\n"
+                "Configure it in Streamlit secrets or "
+                "as an environment variable."
             )
 
         self.client = OpenAI(
             base_url="https://openrouter.ai/api/v1",
-            api_key=api_key
+            api_key=api_key,
         )
 
         self.system_prompt = self.load_system_prompt()
 
+    # ==================================================
+    # Load System Prompt
+    # ==================================================
+
     def load_system_prompt(self):
 
-        prompt_path = Path("assets/system_prompt.txt")
+        prompt_file = Path("assets/system_prompt.txt")
 
-        if prompt_path.exists():
-            return prompt_path.read_text(encoding="utf-8")
+        if prompt_file.exists():
 
-        return (
-            "You are MyAIAnalytics AI Business Consultant. "
-            "Provide concise, professional business insights."
-        )
+            return prompt_file.read_text(
+                encoding="utf-8"
+            )
 
-    def _chat(self, user_message):
+        return """
+You are Pinkal AI Analytics Pro.
+
+You are an executive business analyst.
+
+Your job is to analyze uploaded datasets and provide:
+
+• Executive Summary
+• KPI Analysis
+• Trends
+• Risks
+• Opportunities
+• Recommendations
+
+Always answer using Markdown.
+
+Use headings.
+
+Use bullet points.
+
+Keep responses professional.
+
+Never invent values.
+
+Base every answer only on the supplied dataset context.
+
+If information is unavailable, clearly state that.
+"""
+
+    # ==================================================
+    # Internal Chat
+    # ==================================================
+
+    def _chat(self, message):
 
         response = self.client.chat.completions.create(
 
@@ -58,42 +99,81 @@ class AIAnalyst:
             messages=[
                 {
                     "role": "system",
-                    "content": self.system_prompt
+                    "content": self.system_prompt,
                 },
                 {
                     "role": "user",
-                    "content": user_message
-                }
+                    "content": message,
+                },
             ],
 
-            temperature=0.2
-
+            temperature=0.2,
+            max_tokens=1200,
         )
 
         return response.choices[0].message.content
 
+    # ==================================================
+    # Executive Summary
+    # ==================================================
+
     def summarize(self, df):
 
-        prompt = PromptBuilder.build(df)
+        context = PromptBuilder.build(df)
+
+        prompt = f"""
+Create an executive business report.
+
+Dataset Context
+
+{context}
+
+The report must include:
+
+# Executive Summary
+
+# KPI Highlights
+
+# Business Trends
+
+# Risks
+
+# Opportunities
+
+# Recommended Actions
+
+Keep the report concise and professional.
+"""
 
         return self._chat(prompt)
 
+    # ==================================================
+    # Ask Question
+    # ==================================================
+
     def ask(self, df, question):
 
-        prompt = PromptBuilder.build(df)
+        context = PromptBuilder.build(df)
 
-        user_message = f"""
-Dataset Information
+        prompt = f"""
+Dataset Context
 
-{prompt}
+{context}
 
--------------------------
+--------------------------------------------
 
 Business Question
 
 {question}
 
 Answer as a senior business consultant.
+
+If calculations are possible from the dataset,
+perform them.
+
+Use Markdown formatting.
+
+Keep the answer concise but insightful.
 """
 
-        return self._chat(user_message)
+        return self._chat(prompt)

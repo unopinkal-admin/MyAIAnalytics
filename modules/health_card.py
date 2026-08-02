@@ -6,57 +6,183 @@ class HealthCard:
     @staticmethod
     def show(health):
 
-        score = health["score"]
-        status = health["status"]
+        score = health.get("score", 0)
 
-        # Color based on score
         if score >= 90:
-            color = "🟢"
+            color = "#16A34A"
+            status = "🟢 Excellent"
+            message = "Business performance is excellent."
         elif score >= 75:
-            color = "🟡"
+            color = "#2563EB"
+            status = "🔵 Healthy"
+            message = "Business is performing well."
+        elif score >= 60:
+            color = "#F59E0B"
+            status = "🟡 Monitor"
+            message = "Some areas require attention."
         else:
-            color = "🔴"
+            color = "#DC2626"
+            status = "🔴 Critical"
+            message = "Immediate action recommended."
 
-        st.markdown("## 💚 Business Health")
+        st.markdown(f"""
+<div style="
+background:white;
+border-radius:22px;
+padding:30px;
+border:1px solid #E5E7EB;
+box-shadow:0 8px 24px rgba(0,0,0,.06);
+margin-bottom:25px;
+">
 
-        c1, c2 = st.columns([1, 2])
+<div style="
+font-size:24px;
+font-weight:700;
+margin-bottom:25px;
+color:#1E293B;
+">
+❤️ Business Health
+</div>
 
-        with c1:
-            st.metric(
-                label="Health Score",
-                value=f"{score}/100"
-            )
+<div style="
+display:grid;
+grid-template-columns:170px auto;
+gap:35px;
+align-items:center;
+">
 
-        with c2:
-            st.success(f"{color} Status: {status}")
+<div style="
+width:170px;
+height:170px;
+border-radius:50%;
+border:10px solid {color};
+display:flex;
+align-items:center;
+justify-content:center;
+margin:auto;
+">
 
-        st.markdown("---")
+<div>
 
-        col1, col2 = st.columns(2)
+<div style="
+font-size:52px;
+font-weight:700;
+color:{color};
+text-align:center;
+line-height:1;
+">
+{score}
+</div>
 
-        with col1:
+<div style="
+font-size:15px;
+color:#64748B;
+margin-top:8px;
+text-align:center;
+">
+/100
+</div>
 
-            st.subheader("✅ Strengths")
+</div>
 
-            if health["strengths"]:
-                for item in health["strengths"]:
-                    st.write(f"• {item}")
-            else:
-                st.write("None")
+</div>
 
-        with col2:
+<div>
 
-            st.subheader("⚠ Risks")
+<div style="
+font-size:26px;
+font-weight:700;
+color:#0F172A;
+margin-bottom:12px;
+">
+{status}
+</div>
 
-            if health["risks"]:
-                for item in health["risks"]:
-                    st.write(f"• {item}")
-            else:
-                st.write("None")
+<div style="
+font-size:16px;
+color:#64748B;
+margin-bottom:24px;
+">
+{message}
+</div>
 
-        st.markdown("---")
+<div style="
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:18px;
+">
 
-        st.subheader("🎯 Recommendations")
+<div style="
+background:#F8FAFC;
+padding:18px;
+border-radius:16px;
+text-align:center;
+">
 
-        for item in health["recommendations"]:
-            st.write(f"• {item}")
+<div style="font-size:13px;color:#64748B;">
+Financial
+</div>
+
+<div style="
+font-size:24px;
+font-weight:700;
+margin-top:8px;
+color:#16A34A;
+">
+Healthy
+</div>
+
+</div>
+
+<div style="
+background:#F8FAFC;
+padding:18px;
+border-radius:16px;
+text-align:center;
+">
+
+<div style="font-size:13px;color:#64748B;">
+Operations
+</div>
+
+<div style="
+font-size:24px;
+font-weight:700;
+margin-top:8px;
+color:#2563EB;
+">
+Stable
+</div>
+
+</div>
+
+<div style="
+background:#F8FAFC;
+padding:18px;
+border-radius:16px;
+text-align:center;
+">
+
+<div style="font-size:13px;color:#64748B;">
+Data Quality
+</div>
+
+<div style="
+font-size:24px;
+font-weight:700;
+margin-top:8px;
+color:#7C3AED;
+">
+Good
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+""", unsafe_allow_html=True)

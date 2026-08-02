@@ -5,93 +5,178 @@ import streamlit as st
 class FilterEngine:
 
     @staticmethod
+    def _multiselect(column, label, df):
+
+        values = (
+            df[column]
+            .dropna()
+            .astype(str)
+            .sort_values()
+            .unique()
+            .tolist()
+        )
+
+        return st.multiselect(
+            label,
+            options=values,
+            default=values,
+        )
+
+    @staticmethod
     def apply(df):
 
         filtered_df = df.copy()
 
-        st.subheader("🔎 Dashboard Filters")
+        st.markdown("""
+<div style="
+background:white;
+padding:22px;
+border-radius:22px;
+border:1px solid #E5E7EB;
+box-shadow:0 8px 24px rgba(0,0,0,.06);
+margin-bottom:24px;
+">
+<h2 style="
+margin-top:0;
+margin-bottom:20px;
+color:#1E293B;
+">
+🎛 Executive Filters
+</h2>
+""", unsafe_allow_html=True)
 
         c1, c2, c3, c4 = st.columns(4)
 
-        # -----------------------------
+        # ==================================================
         # Region
-        # -----------------------------
+        # ==================================================
+
         if "Region" in filtered_df.columns:
 
-            regions = sorted(filtered_df["Region"].dropna().unique())
+            with c1:
 
-            selected_regions = c1.multiselect(
-                "🌍 Region",
-                regions,
-                default=regions
-            )
+                selected = FilterEngine._multiselect(
+                    "Region",
+                    "🌍 Region",
+                    filtered_df,
+                )
 
             filtered_df = filtered_df[
-                filtered_df["Region"].isin(selected_regions)
+                filtered_df["Region"].astype(str).isin(selected)
             ]
 
-        # -----------------------------
+        # ==================================================
         # Category
-        # -----------------------------
+        # ==================================================
+
         if "Category" in filtered_df.columns:
 
-            categories = sorted(filtered_df["Category"].dropna().unique())
+            with c2:
 
-            selected_categories = c2.multiselect(
-                "📦 Category",
-                categories,
-                default=categories
-            )
+                selected = FilterEngine._multiselect(
+                    "Category",
+                    "📦 Category",
+                    filtered_df,
+                )
 
             filtered_df = filtered_df[
-                filtered_df["Category"].isin(selected_categories)
+                filtered_df["Category"].astype(str).isin(selected)
             ]
 
-        # -----------------------------
+        # ==================================================
         # Status
-        # -----------------------------
+        # ==================================================
+
         if "Status" in filtered_df.columns:
 
-            status = sorted(filtered_df["Status"].dropna().unique())
+            with c3:
 
-            selected_status = c3.multiselect(
-                "📄 Status",
-                status,
-                default=status
-            )
+                selected = FilterEngine._multiselect(
+                    "Status",
+                    "📄 Status",
+                    filtered_df,
+                )
 
             filtered_df = filtered_df[
-                filtered_df["Status"].isin(selected_status)
+                filtered_df["Status"].astype(str).isin(selected)
             ]
 
-        # -----------------------------
+        # ==================================================
         # Date
-        # -----------------------------
+        # ==================================================
+
         date_columns = filtered_df.select_dtypes(
-            include=["datetime64[ns]"]
+            include=["datetime64[ns]", "datetime64"]
         ).columns.tolist()
 
-        if len(date_columns):
+        if date_columns:
 
-            date_col = date_columns[0]
+            with c4:
 
-            minimum = filtered_df[date_col].min()
-            maximum = filtered_df[date_col].max()
+                date_col = date_columns[0]
 
-            dates = c4.date_input(
-                "📅 Date",
-                value=(minimum, maximum),
-                min_value=minimum,
-                max_value=maximum
-            )
+                start = filtered_df[date_col].min()
+                end = filtered_df[date_col].max()
 
-            if len(dates) == 2:
+                selected_dates = st.date_input(
+                    "📅 Date Range",
+                    value=(start, end),
+                    min_value=start,
+                    max_value=end,
+                )
+
+            if isinstance(selected_dates, tuple) and len(selected_dates) == 2:
 
                 filtered_df = filtered_df[
-                    (filtered_df[date_col] >= pd.Timestamp(dates[0])) &
-                    (filtered_df[date_col] <= pd.Timestamp(dates[1]))
+                    (
+                        filtered_df[date_col]
+                        >= pd.Timestamp(selected_dates[0])
+                    )
+                    &
+                    (
+                        filtered_df[date_col]
+                        <= pd.Timestamp(selected_dates[1])
+                    )
                 ]
 
-        st.divider()
+        st.markdown(
+            f"""
+<div style="
+margin-top:18px;
+padding-top:18px;
+border-top:1px solid #E5E7EB;
+display:flex;
+justify-content:space-between;
+align-items:center;
+">
+
+<div style="
+font-size:15px;
+color:#64748B;
+">
+Showing
+<b>{len(filtered_df):,}</b>
+of
+<b>{len(df):,}</b>
+records
+</div>
+
+<div style="
+background:#2563EB;
+color:white;
+padding:8px 16px;
+border-radius:999px;
+font-size:13px;
+font-weight:600;
+">
+Active Dashboard Filters
+</div>
+
+</div>
+
+</div>
+""",
+            unsafe_allow_html=True,
+        )
 
         return filtered_df

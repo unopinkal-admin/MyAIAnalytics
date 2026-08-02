@@ -1,99 +1,119 @@
 import pandas as pd
 
+from modules.dataset_analyzer import DatasetAnalyzer
+
 
 class PromptBuilder:
 
     @staticmethod
     def build(df):
 
-        prompt = []
+        analysis = DatasetAnalyzer.analyze(df)
 
-        prompt.append("# Dataset Overview")
+        lines = []
 
-        prompt.append(f"Rows: {len(df):,}")
-        prompt.append(f"Columns: {len(df.columns)}")
+        # ==================================================
+        # DATASET OVERVIEW
+        # ==================================================
 
-        prompt.append("")
+        lines.append("# DATASET OVERVIEW")
+        lines.append(f"Rows: {analysis['rows']:,}")
+        lines.append(f"Columns: {analysis['columns']}")
+        lines.append(f"Dataset Type: {analysis['dataset_type']}")
+        lines.append("")
 
-        # -------------------------
-        # Column Types
-        # -------------------------
+        # ==================================================
+        # IMPORTANT COLUMNS
+        # ==================================================
 
-        numeric = df.select_dtypes(include="number").columns.tolist()
-        text = df.select_dtypes(include=["object", "string"]).columns.tolist()
+        lines.append("# IMPORTANT COLUMNS")
+        lines.append(f"Primary Metric: {analysis['primary_metric']}")
+        lines.append(f"Primary Date: {analysis['primary_date']}")
+        lines.append(f"Region: {analysis['region']}")
+        lines.append(f"Category: {analysis['category']}")
+        lines.append(f"Status: {analysis['status']}")
+        lines.append("")
 
-        prompt.append("Numeric Columns:")
-        prompt.append(", ".join(numeric) if numeric else "None")
+        # ==================================================
+        # DATA QUALITY
+        # ==================================================
 
-        prompt.append("")
-        prompt.append("Text Columns:")
-        prompt.append(", ".join(text) if text else "None")
+        lines.append("# DATA QUALITY")
+        lines.append(f"Missing Values: {analysis['missing_values']:,}")
+        lines.append(f"Duplicate Rows: {analysis['duplicate_rows']:,}")
+        lines.append("")
 
-        prompt.append("")
+        # ==================================================
+        # NUMERIC SUMMARY
+        # ==================================================
 
-        # -------------------------
-        # Missing Values
-        # -------------------------
-
-        missing = df.isna().sum()
-
-        prompt.append("Missing Values:")
-
-        for col, value in missing.items():
-
-            if value > 0:
-
-                prompt.append(f"- {col}: {value}")
-
-        if missing.sum() == 0:
-            prompt.append("None")
-
-        prompt.append("")
-
-        # -------------------------
-        # Numeric Statistics
-        # -------------------------
+        numeric = analysis["numeric"]
 
         if numeric:
 
-            prompt.append("Key Statistics:")
+            lines.append("# NUMERIC SUMMARY")
 
-            for col in numeric:
+            for column in numeric:
 
-                prompt.append(
-                    f"""
-{col}
+                series = df[column].dropna()
 
-Average : {round(df[col].mean(),2)}
+                if series.empty:
+                    continue
 
-Minimum : {df[col].min()}
+                lines.append(f"## {column}")
 
-Maximum : {df[col].max()}
+                lines.append(f"Total: {series.sum():,.2f}")
+                lines.append(f"Average: {series.mean():,.2f}")
+                lines.append(f"Minimum: {series.min():,.2f}")
+                lines.append(f"Maximum: {series.max():,.2f}")
+                lines.append(f"Median: {series.median():,.2f}")
 
-Total : {round(df[col].sum(),2)}
-"""
+                lines.append("")
+
+        # ==================================================
+        # TOP CATEGORIES
+        # ==================================================
+
+        categorical = analysis["categorical"][:3]
+
+        if categorical:
+
+            lines.append("# TOP CATEGORIES")
+
+            for column in categorical:
+
+                lines.append(f"## {column}")
+
+                values = (
+                    df[column]
+                    .fillna("Unknown")
+                    .astype(str)
+                    .value_counts()
+                    .head(10)
                 )
 
-        prompt.append("")
+                for value, count in values.items():
 
-        # -------------------------
-        # Top Categories
-        # -------------------------
+                    lines.append(f"- {value}: {count:,}")
 
-        for col in text[:3]:
+                lines.append("")
 
-            prompt.append(f"Top values in {col}:")
+        # ==================================================
+        # SAMPLE RECORDS
+        # ==================================================
 
-            values = (
-                df[col]
-                .value_counts()
-                .head(5)
-            )
+        lines.append("# SAMPLE DATA")
 
-            for item, count in values.items():
+        preview = df.head(5)
 
-                prompt.append(f"- {item}: {count}")
+        lines.append(
+            preview.to_markdown(index=False)
+        )
 
-            prompt.append("")
+        lines.append("")
 
-        return "\n".join(prompt)
+        lines.append(
+            "Answer all business questions ONLY using the information above."
+        )
+
+        return "\n".join(lines)

@@ -20,11 +20,28 @@ html, body, [class*="css"]{
 }
 
 /* -------------------------------------------------
-   Main App
+   Main App Background
 -------------------------------------------------- */
 
 .stApp{
-    background:#F3F6FB;
+
+    background:
+        radial-gradient(circle at top right,#dbeafe 0%,transparent 35%),
+        radial-gradient(circle at bottom left,#e0f2fe 0%,transparent 30%),
+        linear-gradient(180deg,#eef4ff 0%,#f8fbff 100%);
+
+}
+
+/* Main content */
+
+.main .block-container{
+
+    max-width:1450px;
+
+    padding-top:1.2rem;
+
+    padding-bottom:2rem;
+
 }
 
 /* -------------------------------------------------
@@ -32,12 +49,17 @@ html, body, [class*="css"]{
 -------------------------------------------------- */
 
 section[data-testid="stSidebar"]{
+
     background:#111827;
+
     border-right:1px solid #1F2937;
+
 }
 
 section[data-testid="stSidebar"] *{
+
     color:white;
+
 }
 
 /* -------------------------------------------------
@@ -45,17 +67,25 @@ section[data-testid="stSidebar"] *{
 -------------------------------------------------- */
 
 h1{
+
     color:#1E3A8A;
+
     font-weight:700;
+
 }
 
 h2{
+
     color:#1E293B;
+
     font-weight:700;
+
 }
 
 h3{
+
     color:#334155;
+
 }
 
 /* -------------------------------------------------
@@ -63,30 +93,40 @@ h3{
 -------------------------------------------------- */
 
 .metric-card{
-    background:white;
-    border-radius:18px;
-    padding:18px;
-    border:1px solid #E5E7EB;
-    box-shadow:0 8px 20px rgba(0,0,0,.06);
+
+    background:rgba(255,255,255,.85);
+
+    backdrop-filter:blur(18px);
+
+    border-radius:20px;
+
+    padding:20px;
+
+    border:1px solid rgba(255,255,255,.55);
+
+    box-shadow:0 15px 40px rgba(15,23,42,.08);
+
 }
 
 /* -------------------------------------------------
-   Chart Containers
+   Chart Cards
 -------------------------------------------------- */
 
 .chart-card{
 
-    background:white;
+    background:rgba(255,255,255,.82);
 
-    padding:18px;
+    backdrop-filter:blur(18px);
 
-    border-radius:18px;
+    border-radius:22px;
 
-    border:1px solid #E5E7EB;
+    padding:22px;
 
-    box-shadow:0 8px 20px rgba(0,0,0,.06);
+    border:1px solid rgba(255,255,255,.5);
 
-    margin-bottom:20px;
+    box-shadow:0 15px 35px rgba(15,23,42,.08);
+
+    margin-bottom:22px;
 
 }
 
@@ -100,11 +140,9 @@ h3{
 
     color:white;
 
-    border-radius:10px;
+    border-radius:12px;
 
     border:none;
-
-    padding:.6rem 1.2rem;
 
     font-weight:600;
 
@@ -122,44 +160,28 @@ h3{
 
 [data-testid="stFileUploader"]{
 
-    background:white;
+    background:rgba(255,255,255,.75);
 
-    border-radius:16px;
+    border-radius:18px;
 
     border:2px dashed #CBD5E1;
 
-    padding:20px;
-
 }
 
 /* -------------------------------------------------
-   Tabs
--------------------------------------------------- */
-
-.stTabs [data-baseweb="tab"]{
-
-    font-weight:600;
-
-    font-size:15px;
-
-}
-
-/* -------------------------------------------------
-   Dataframe
+   DataFrame
 -------------------------------------------------- */
 
 [data-testid="stDataFrame"]{
 
     border-radius:18px;
 
-    border:1px solid #E5E7EB;
-
     overflow:hidden;
 
 }
 
 /* -------------------------------------------------
-   Plotly Charts
+   Plotly
 -------------------------------------------------- */
 
 .js-plotly-plot{
@@ -169,28 +191,16 @@ h3{
 }
 
 /* -------------------------------------------------
-   Horizontal Rule
+   Divider
 -------------------------------------------------- */
 
 hr{
 
-    margin-top:25px;
+    margin-top:28px;
 
-    margin-bottom:25px;
+    margin-bottom:28px;
 
-}
-
-/* -------------------------------------------------
-   Reduce top padding
--------------------------------------------------- */
-
-.block-container{
-
-    padding-top:1.2rem;
-
-    padding-bottom:2rem;
-
-    max-width:1450px;
+    border-color:#dbe4f0;
 
 }
 

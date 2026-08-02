@@ -13,6 +13,16 @@ class MetricCard:
         "gray": "#475569",
     }
 
+    LIGHT_COLORS = {
+        "blue": "#DBEAFE",
+        "green": "#DCFCE7",
+        "orange": "#FED7AA",
+        "purple": "#E9D5FF",
+        "red": "#FEE2E2",
+        "teal": "#CCFBF1",
+        "gray": "#E2E8F0",
+    }
+
     @staticmethod
     def show(
         title,
@@ -23,59 +33,133 @@ class MetricCard:
     ):
 
         accent = MetricCard.COLORS.get(color, "#2563EB")
+        light = MetricCard.LIGHT_COLORS.get(color, "#DBEAFE")
 
         html = f"""
-<div style="
-background:white;
-border-radius:18px;
-padding:22px;
-border-left:6px solid {accent};
-box-shadow:0 6px 18px rgba(0,0,0,.08);
-height:145px;
-display:flex;
-flex-direction:column;
-justify-content:center;
-transition:0.25s;
-">
+<style>
 
-<div style="
-font-size:15px;
-font-weight:600;
-color:#64748B;
-margin-bottom:10px;
-">
+.metric-card-v2{{
+    background:rgba(255,255,255,.94);
+    border-radius:22px;
+    border:1px solid rgba(226,232,240,.9);
 
-{icon or ""} {title}
+    padding:24px;
+
+    height:185px;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+
+    box-shadow:
+        0 10px 30px rgba(15,23,42,.08);
+
+    transition:all .25s ease;
+}}
+
+.metric-card-v2:hover{{
+    transform:translateY(-4px);
+
+    box-shadow:
+        0 18px 42px rgba(15,23,42,.15);
+}}
+
+.metric-top{{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}}
+
+.metric-title{{
+    font-size:15px;
+    color:#64748B;
+    font-weight:600;
+}}
+
+.metric-icon{{
+    width:54px;
+    height:54px;
+
+    border-radius:16px;
+
+    background:{light};
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:26px;
+}}
+
+.metric-value{{
+    font-size:40px;
+    font-weight:700;
+    color:#0F172A;
+
+    margin-top:18px;
+}}
+
+.metric-subtitle{{
+    margin-top:10px;
+
+    color:#64748B;
+
+    font-size:14px;
+}}
+
+.metric-footer{{
+    margin-top:16px;
+
+    font-size:13px;
+
+    color:{accent};
+
+    font-weight:700;
+}}
+
+</style>
+
+<div class="metric-card-v2">
+
+<div class="metric-top">
+
+<div class="metric-title">
+{title}
+</div>
+
+<div class="metric-icon">
+{icon or "📊"}
+</div>
 
 </div>
 
-<div style="
-font-size:34px;
-font-weight:700;
-color:{accent};
-line-height:1.2;
-">
+<div>
 
+<div class="metric-value">
 {value}
-
 </div>
+
 """
 
         if subtitle:
 
             html += f"""
-<div style="
-margin-top:12px;
-font-size:14px;
-color:#94A3B8;
-">
-
+<div class="metric-subtitle">
 {subtitle}
-
 </div>
 """
 
-        html += "</div>"
+        html += f"""
+
+<div class="metric-footer">
+● Live Business Metric
+</div>
+
+</div>
+
+</div>
+
+"""
 
         st.markdown(
             html,

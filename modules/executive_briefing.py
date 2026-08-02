@@ -3,75 +3,124 @@ class ExecutiveBriefing:
     @staticmethod
     def generate(project):
 
-        profile = project["profile"]
+        metrics = project["metrics"]
+        health = project["health"]
 
         findings = []
-
-        # Dataset size
-        findings.append(
-            f"Your dataset contains {profile['rows']:,} rows across {profile['columns']} columns."
-        )
-
-        # Quality
-        quality = profile["quality_score"]
-
-        if quality >= 90:
-            findings.append(
-                "The overall data quality is excellent."
-            )
-        elif quality >= 70:
-            findings.append(
-                "The data quality is good, but there are areas to improve."
-            )
-        else:
-            findings.append(
-                "The dataset requires cleaning before deeper analysis."
-            )
-
-        # Missing values
-        missing = sum(profile["missing_values"].values())
-
-        if missing == 0:
-            findings.append(
-                "No missing values were detected."
-            )
-        else:
-            findings.append(
-                f"{missing} missing values were detected."
-            )
-
-        # Duplicates
-        if profile["duplicates"] == 0:
-            findings.append(
-                "No duplicate records were found."
-            )
-        else:
-            findings.append(
-                f"{profile['duplicates']} duplicate rows were detected."
-            )
-
-        # Recommendations
         recommendations = []
 
+        revenue = metrics.get("revenue")
+        margin = metrics.get("margin")
+        quality = metrics.get("quality")
+        missing = metrics.get("missing")
+
+        # -----------------------------
+        # Revenue
+        # -----------------------------
+        if revenue is not None:
+            findings.append(
+                f"💰 Total Revenue: ${revenue:,.0f}"
+            )
+
+        # -----------------------------
+        # Margin
+        # -----------------------------
+        if margin is not None:
+
+            if margin >= 25:
+                findings.append(
+                    f"📈 Profit margin is strong ({margin:.1f}%)."
+                )
+
+            elif margin >= 10:
+                findings.append(
+                    f"📊 Profit margin is acceptable ({margin:.1f}%)."
+                )
+
+            else:
+                findings.append(
+                    f"⚠️ Profit margin is low ({margin:.1f}%)."
+                )
+
+                recommendations.append(
+                    "Review operating costs to improve profitability."
+                )
+
+        # -----------------------------
+        # Data Quality
+        # -----------------------------
+        if quality >= 90:
+
+            findings.append(
+                f"✅ Dataset quality is excellent ({quality:.1f}%)."
+            )
+
+        elif quality >= 70:
+
+            findings.append(
+                f"🟡 Dataset quality is good ({quality:.1f}%)."
+            )
+
+            recommendations.append(
+                "Review missing records to further improve data quality."
+            )
+
+        else:
+
+            findings.append(
+                f"🔴 Dataset quality requires attention ({quality:.1f}%)."
+            )
+
+            recommendations.append(
+                "Clean missing and inconsistent records."
+            )
+
+        # -----------------------------
+        # Missing Values
+        # -----------------------------
         if missing > 0:
-            recommendations.append(
-                "Review and resolve missing values."
+
+            findings.append(
+                f"📄 Missing values detected: {missing:,}"
             )
 
-        if profile["duplicates"] > 0:
-            recommendations.append(
-                "Remove duplicate records."
+        # -----------------------------
+        # Business Health
+        # -----------------------------
+        score = health.get("score", 0)
+
+        if score >= 90:
+
+            findings.append(
+                "🟢 Overall business health is excellent."
             )
 
-        recommendations.append(
-            "Explore the interactive dashboard for trends."
-        )
+        elif score >= 75:
 
-        recommendations.append(
-            "Use the AI Analyst to ask business questions."
-        )
+            findings.append(
+                "🔵 Business performance is healthy."
+            )
+
+        else:
+
+            findings.append(
+                "🔴 Business performance requires attention."
+            )
+
+            recommendations.append(
+                "Prioritize low-performing business areas."
+            )
+
+        # -----------------------------
+        # Default Recommendation
+        # -----------------------------
+        if not recommendations:
+
+            recommendations.append(
+                "Continue monitoring KPIs and maintain current performance."
+            )
 
         return {
             "findings": findings,
-            "recommendations": recommendations
+            "recommendations": recommendations,
         }

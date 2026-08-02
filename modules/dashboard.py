@@ -1,112 +1,96 @@
-import pandas as pd
-import plotly.express as px
 import streamlit as st
+
+from modules.business_metrics import BusinessMetrics
+from modules.chart_engine import ChartEngine
+from modules.executive_briefing import ExecutiveBriefing
+from modules.health_card import HealthCard
+from modules.header import Header
+from modules.kpi_cards import KPICards
 
 
 class Dashboard:
 
     @staticmethod
-    def build(df):
+    def build(project):
 
-        st.header("📊 Dashboard")
+        metrics = BusinessMetrics.calculate(project)
+        project["metrics"] = metrics
 
-        Dashboard.show_kpis(df)
+        Header.show(project)
 
-        Dashboard.show_charts(df)
+        st.markdown(
+            "<div style='height:24px'></div>",
+            unsafe_allow_html=True,
+        )
+
+        KPICards.show(project)
+
+        st.markdown(
+            "<div style='height:24px'></div>",
+            unsafe_allow_html=True,
+        )
+
+        ChartEngine.show(project["df"])
+
+        st.markdown(
+            "<div style='height:24px'></div>",
+            unsafe_allow_html=True,
+        )
+
+        Dashboard.show_ai_summary(project)
+
+        st.markdown(
+            "<div style='height:24px'></div>",
+            unsafe_allow_html=True,
+        )
+
+        HealthCard.show(project["health"])
 
     @staticmethod
-    def show_kpis(df):
+    def show_ai_summary(project):
 
-        numeric = df.select_dtypes(include="number")
+        briefing = ExecutiveBriefing.generate(project)
 
-        if numeric.empty:
-            return
+        st.markdown(
+            """
+<div style="
+background:white;
+border-radius:22px;
+padding:26px;
+border:1px solid #E5E7EB;
+box-shadow:0 8px 24px rgba(0,0,0,.06);
+margin-bottom:24px;
+">
 
-        c1, c2, c3, c4 = st.columns(4)
+<h2 style="
+margin-top:0;
+margin-bottom:24px;
+color:#1E293B;
+">
+🧠 AI Executive Summary
+</h2>
 
-        c1.metric(
-            "Rows",
-            len(df)
+""",
+            unsafe_allow_html=True,
         )
 
-        c2.metric(
-            "Columns",
-            len(df.columns)
+        left, right = st.columns(2)
+
+        with left:
+
+            st.markdown("#### 📌 Key Findings")
+
+            for finding in briefing["findings"]:
+                st.success(finding)
+
+        with right:
+
+            st.markdown("#### 🎯 Recommendations")
+
+            for recommendation in briefing["recommendations"]:
+                st.info(recommendation)
+
+        st.markdown(
+            "</div>",
+            unsafe_allow_html=True,
         )
-
-        c3.metric(
-            "Numeric Columns",
-            len(numeric.columns)
-        )
-
-        c4.metric(
-            "Total Missing",
-            int(df.isna().sum().sum())
-        )
-
-    @staticmethod
-    def show_charts(df):
-
-        numeric = df.select_dtypes(include="number").columns.tolist()
-
-        category = df.select_dtypes(
-            include=["object", "string", "category"]
-        ).columns.tolist()
-
-        if len(numeric) == 0:
-            st.info("No numeric columns found.")
-            return
-
-        # Histogram
-
-        st.subheader("Distribution")
-
-        fig = px.histogram(
-            df,
-            x=numeric[0]
-        )
-
-        st.plotly_chart(
-            fig,
-            width="stretch"
-        )
-
-        if len(category) > 0:
-
-            grouped = (
-                df.groupby(category[0])[numeric[0]]
-                .sum()
-                .reset_index()
-                .sort_values(
-                    numeric[0],
-                    ascending=False
-                )
-            )
-
-            st.subheader(f"{numeric[0]} by {category[0]}")
-
-            fig = px.bar(
-                grouped,
-                x=category[0],
-                y=numeric[0]
-            )
-
-            st.plotly_chart(
-                fig,
-                width="stretch"
-            )
-
-        if len(numeric) >= 2:
-
-            st.subheader("Correlation")
-
-            fig = px.scatter(
-                df,
-                x=numeric[0],
-                y=numeric[1]
-            )
-
-            st.plotly_chart(
-                fig,
-                width="stretch"
-            )
