@@ -1,6 +1,8 @@
 import plotly.express as px
 import streamlit as st
 
+from modules.dataset_analyzer import DatasetAnalyzer
+
 
 class ChartEngine:
 
@@ -9,90 +11,95 @@ class ChartEngine:
 
         st.subheader("📊 Business Analytics")
 
-        numeric = df.select_dtypes(include="number").columns.tolist()
+        analysis = DatasetAnalyzer.analyze(df)
 
-        if len(numeric) == 0:
+        metric = analysis["primary_metric"]
+        region = analysis["region"]
+        category = analysis["category"]
+        date_col = analysis["primary_date"]
+
+        if metric is None:
             st.info("No numeric columns available.")
             return
 
-        c1, c2 = st.columns(2)
+        top_left, top_right = st.columns(2)
+        bottom_left, bottom_right = st.columns(2)
 
-        # ======================================
-        # Revenue by Region
-        # ======================================
+        # ==================================================
+        # Metric by Region
+        # ==================================================
 
-        if "Region" in df.columns:
-
-            revenue = numeric[0]
+        if region:
 
             chart = (
-                df.groupby("Region")[revenue]
+                df.groupby(region)[metric]
                 .sum()
                 .reset_index()
             )
 
             fig = px.bar(
                 chart,
-                x="Region",
-                y=revenue,
-                title=f"{revenue} by Region",
-                color=revenue,
-                text_auto=".2s"
+                x=region,
+                y=metric,
+                color=metric,
+                text_auto=".2s",
+                title=f"{metric} by {region}"
             )
 
-            fig.update_layout(height=400)
+            fig.update_layout(
+                height=420,
+                margin=dict(l=20, r=20, t=50, b=20)
+            )
 
-            c1.plotly_chart(
+            top_left.plotly_chart(
                 fig,
                 use_container_width=True
             )
 
-        # ======================================
-        # Revenue by Category
-        # ======================================
+        else:
+            top_left.info("No geographic column detected.")
 
-        if "Category" in df.columns:
+        # ==================================================
+        # Metric by Category
+        # ==================================================
 
-            revenue = numeric[0]
+        if category:
 
             chart = (
-                df.groupby("Category")[revenue]
+                df.groupby(category)[metric]
                 .sum()
                 .reset_index()
             )
 
             fig = px.pie(
                 chart,
-                names="Category",
-                values=revenue,
-                hole=.55
+                names=category,
+                values=metric,
+                hole=.55,
+                title=f"{metric} by {category}"
             )
 
-            fig.update_layout(height=400)
+            fig.update_layout(
+                height=420,
+                margin=dict(l=20, r=20, t=50, b=20)
+            )
 
-            c2.plotly_chart(
+            top_right.plotly_chart(
                 fig,
                 use_container_width=True
             )
 
-        # ======================================
+        else:
+            top_right.info("No category column detected.")
+
+        # ==================================================
         # Trend
-        # ======================================
+        # ==================================================
 
-        date_columns = df.select_dtypes(
-            include="datetime"
-        ).columns.tolist()
-
-        if len(date_columns):
-
-            st.divider()
-
-            date_col = date_columns[0]
-
-            revenue = numeric[0]
+        if date_col:
 
             trend = (
-                df.groupby(date_col)[revenue]
+                df.groupby(date_col)[metric]
                 .sum()
                 .reset_index()
             )
@@ -100,14 +107,41 @@ class ChartEngine:
             fig = px.line(
                 trend,
                 x=date_col,
-                y=revenue,
+                y=metric,
                 markers=True,
-                title=f"{revenue} Trend"
+                title=f"{metric} Trend"
             )
 
-            fig.update_layout(height=450)
+            fig.update_layout(
+                height=420,
+                margin=dict(l=20, r=20, t=50, b=20)
+            )
 
-            st.plotly_chart(
+            bottom_left.plotly_chart(
                 fig,
                 use_container_width=True
             )
+
+        else:
+            bottom_left.info("No date column detected.")
+
+        # ==================================================
+        # Distribution
+        # ==================================================
+
+        fig = px.histogram(
+            df,
+            x=metric,
+            nbins=25,
+            title=f"{metric} Distribution"
+        )
+
+        fig.update_layout(
+            height=420,
+            margin=dict(l=20, r=20, t=50, b=20)
+        )
+
+        bottom_right.plotly_chart(
+            fig,
+            use_container_width=True
+        )

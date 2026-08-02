@@ -1,17 +1,9 @@
-import pandas as pd
+from modules.dataset_analyzer import DatasetAnalyzer
 
 
 class BusinessMetrics:
     """
-    Calculates reusable business metrics for the entire application.
-
-    This module contains NO Streamlit code.
-
-    It simply returns numbers that can be used by:
-        • Dashboard
-        • AI Analyst
-        • Reports
-        • Exports
+    Calculates reusable business metrics for the application.
     """
 
     @staticmethod
@@ -20,30 +12,22 @@ class BusinessMetrics:
         df = project["df"]
         profile = project["profile"]
 
-        metrics = {}
+        analysis = DatasetAnalyzer.analyze(df)
 
-        # --------------------------------------------------
-        # Basic Metrics
-        # --------------------------------------------------
+        metrics = {}
 
         metrics["rows"] = profile["rows"]
         metrics["columns"] = profile["columns"]
         metrics["quality"] = profile["quality_score"]
 
-        # --------------------------------------------------
-        # Revenue
-        # --------------------------------------------------
+        metric = analysis["primary_metric"]
 
         revenue = None
 
-        if "Sales" in df.columns:
-            revenue = df["Sales"].sum(skipna=True)
+        if metric:
+            revenue = df[metric].sum(skipna=True)
 
         metrics["revenue"] = revenue
-
-        # --------------------------------------------------
-        # Cost
-        # --------------------------------------------------
 
         cost = None
 
@@ -52,20 +36,12 @@ class BusinessMetrics:
 
         metrics["cost"] = cost
 
-        # --------------------------------------------------
-        # Profit
-        # --------------------------------------------------
-
         profit = None
 
         if revenue is not None and cost is not None:
             profit = revenue - cost
 
         metrics["profit"] = profit
-
-        # --------------------------------------------------
-        # Margin %
-        # --------------------------------------------------
 
         margin = None
 
@@ -74,16 +50,7 @@ class BusinessMetrics:
 
         metrics["margin"] = margin
 
-        # --------------------------------------------------
-        # Transactions
-        # --------------------------------------------------
-
         metrics["transactions"] = len(df)
-
-        # --------------------------------------------------
-        # Missing Values
-        # --------------------------------------------------
-
         metrics["missing"] = int(df.isna().sum().sum())
 
         return metrics

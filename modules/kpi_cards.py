@@ -1,5 +1,4 @@
 import streamlit as st
-
 from modules.business_metrics import BusinessMetrics
 
 
@@ -7,51 +6,45 @@ class KPICards:
 
     @staticmethod
     def money(value):
-
         if value is None:
             return "-"
-
         return f"${value:,.0f}"
 
     @staticmethod
     def percent(value):
-
         if value is None:
             return "-"
-
         return f"{value:.1f}%"
 
     @staticmethod
     def number(value):
-
         if value is None:
             return "-"
-
         return f"{value:,}"
 
     @staticmethod
-    def card(title, value):
+    def card(title, value, color="#1f77b4"):
 
         st.markdown(
             f"""
 <div style="
-background:#ffffff;
-padding:18px;
-border-radius:16px;
-box-shadow:0 2px 10px rgba(0,0,0,.08);
+background:linear-gradient(135deg,#ffffff,#f8fbff);
+padding:22px;
+border-radius:18px;
+border-left:6px solid {color};
+box-shadow:0 4px 12px rgba(0,0,0,.08);
 border:1px solid #ececec;
-text-align:center;
-height:120px;
+height:140px;
 display:flex;
 flex-direction:column;
 justify-content:center;
 ">
 
 <div style="
-font-size:15px;
-color:#666;
-margin-bottom:10px;
+font-size:16px;
 font-weight:600;
+color:#666;
+margin-bottom:14px;
 ">
 
 {title}
@@ -59,9 +52,10 @@ font-weight:600;
 </div>
 
 <div style="
-font-size:34px;
+font-size:36px;
 font-weight:700;
-color:#1f77b4;
+color:{color};
+line-height:1;
 ">
 
 {value}
@@ -83,35 +77,41 @@ color:#1f77b4;
         with c1:
             KPICards.card(
                 "💰 Revenue",
-                KPICards.money(metrics["revenue"])
+                KPICards.money(metrics["revenue"]),
+                "#2E86DE",
             )
 
         with c2:
             KPICards.card(
                 "💸 Cost",
-                KPICards.money(metrics["cost"])
+                KPICards.money(metrics["cost"]),
+                "#E67E22",
             )
 
         with c3:
             KPICards.card(
                 "📈 Profit",
-                KPICards.money(metrics["profit"])
+                KPICards.money(metrics["profit"]),
+                "#27AE60",
             )
 
         with c4:
             KPICards.card(
                 "📊 Margin",
-                KPICards.percent(metrics["margin"])
+                KPICards.percent(metrics["margin"]),
+                "#8E44AD",
             )
 
         with c5:
             KPICards.card(
                 "📄 Records",
-                KPICards.number(metrics["rows"])
+                KPICards.number(metrics["rows"]),
+                "#16A085",
             )
 
         with c6:
             KPICards.card(
                 "⭐ Quality",
-                KPICards.percent(metrics["quality"])
+                KPICards.percent(metrics["quality"]),
+                "#C0392B",
             )
